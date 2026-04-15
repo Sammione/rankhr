@@ -57,13 +57,22 @@ def detect_role_type(jd_text: str) -> str:
     
     # Keywords to identify role types
     tech_keywords = ['engineer', 'developer', 'software', 'programmer', 'tech', 'it', 'fullstack', 'full-stack', 'devops', 'data scientist', 'ml engineer', 'ai engineer', 'cloud engineer', 'systems', 'architect', 'cybersecurity', 'qa engineer', 'test engineer']
-    business_keywords = ['manager', 'director', 'analyst', 'finance', 'accounting', 'hr', 'human resources', 'sales', 'marketing', 'business development', 'operations', 'project manager', 'product manager', 'consultant', 'executive']
+    business_keywords = ['manager', 'director', 'analyst', 'finance', 'accounting', 'accountant', 'audit', 'auditor', 'hr', 'human resources', 'sales', 'marketing', 'business development', 'operations', 'project manager', 'product manager', 'consultant', 'executive']
     creative_keywords = ['designer', 'graphic', 'ui/ux', 'ux/ui', 'visual', 'creative', 'content', 'copywriter', 'video editor', 'photographer', 'animator', 'illustrator', 'art director', 'multimedia']
     
-    # Count keyword matches
-    tech_count = sum(1 for kw in tech_keywords if kw in jd_lower)
-    business_count = sum(1 for kw in business_keywords if kw in jd_lower)
-    creative_count = sum(1 for kw in creative_keywords if kw in jd_lower)
+    # Count keyword matches using word boundaries to avoid false positives (e.g., 'it' in 'auditing')
+    def count_matches(keywords, text):
+        count = 0
+        for kw in keywords:
+            # Use regex for whole word matching
+            pattern = r'\b' + re.escape(kw.lower()) + r'\b'
+            if re.search(pattern, text):
+                count += 1
+        return count
+
+    tech_count = count_matches(tech_keywords, jd_lower)
+    business_count = count_matches(business_keywords, jd_lower)
+    creative_count = count_matches(creative_keywords, jd_lower)
     
     # Determine role type
     max_count = max(tech_count, business_count, creative_count)
