@@ -1,4 +1,4 @@
-from sentence_transformers import SentenceTransformer, util
+# from sentence_transformers import SentenceTransformer, util
 import numpy as np
 import re
 from typing import List, Dict, Any
@@ -10,9 +10,15 @@ def get_model():
     """Lazy load the AI model to prevent startup timeouts"""
     global _model
     if _model is None:
+        from sentence_transformers import SentenceTransformer
         print("Loading AI model for the first time... this may take a moment.")
         _model = SentenceTransformer('all-MiniLM-L6-v2')
     return _model
+
+def get_util():
+    """Lazy load the utility module"""
+    from sentence_transformers import util
+    return util
 
 # Define skills and keywords for different role types
 ROLE_SKILLS = {
@@ -104,6 +110,7 @@ def calculate_match_score(jd_text: str, cv_text: str) -> float:
     
     # Base semantic similarity score (works for all role types)
     model = get_model()
+    util = get_util()
     jd_embedding = model.encode(jd_text, convert_to_tensor=True)
     cv_embedding = model.encode(cv_text, convert_to_tensor=True)
     base_score = float(util.cos_sim(jd_embedding, cv_embedding)[0][0])

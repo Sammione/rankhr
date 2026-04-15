@@ -3,7 +3,8 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Union
-from ranking_logic import rank_cvs
+# Lazy imports for speed
+# from ranking_logic import rank_cvs
 
 app = FastAPI(title="Seamless HR - AI Ranking Engine")
 
@@ -22,12 +23,17 @@ class RankRequest(BaseModel):
 @app.get("/")
 def home():
     return {
+        "status": "online",
         "message": "AI Ranking Engine is running", 
         "endpoints": [
             "GET /",
-            "POST /rank (Send Job Description and CVs directly in the request body)"
+            "POST /rank"
         ]
     }
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
 
 @app.post("/rank")
 def process_ranking(payload: RankRequest):
@@ -36,6 +42,7 @@ def process_ranking(payload: RankRequest):
     The backend service sends the actual TEXT data in the payload.
     """
     try:
+        from ranking_logic import rank_cvs
         # 1. Convert Pydantic objects to a list of dictionaries for the ranking logic
         cv_list = [{"id": cv.id, "name": cv.name, "text": cv.text} for cv in payload.cvs]
         
