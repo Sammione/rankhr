@@ -169,23 +169,27 @@ def rank_cvs(jd_text, cv_list):
         score = calculate_match_score(jd_text, cv_text)
         score_percentage = round(score * 100, 2)
         
-        # Determine match level
+        # Determine match level with precision terminology
+        match_level = f"{score_percentage}% Precision"
+        
+        # Internal descriptive label for logging or complex filtering if needed
         if score_percentage >= 80:
-            match_level = "Excellent"
+            label = "Excellent"
         elif score_percentage >= 60:
-            match_level = "Good"
+            label = "Good"
         elif score_percentage >= 40:
-            match_level = "Moderate"
+            label = "Moderate"
         elif score_percentage >= 20:
-            match_level = "Poor"
+            label = "Poor"
         else:
-            match_level = "Not Suitable"
+            label = "Not Suitable"
         
         ranked_results.append({
             "applicant_id": cv.get('id'),
             "name": cv.get('name', 'Unknown'),
             "score": score_percentage,
             "match_level": match_level,
+            "precision_label": label,  # Added extra label for internal use
             "role_type": role_type
         })
     
