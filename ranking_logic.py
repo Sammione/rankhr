@@ -3,8 +3,16 @@ import numpy as np
 import re
 from typing import List, Dict, Any
 
-# Load a lightweight, fast model (runs locally for free)
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# Global variable for the model (lazy loaded)
+_model = None
+
+def get_model():
+    """Lazy load the AI model to prevent startup timeouts"""
+    global _model
+    if _model is None:
+        print("Loading AI model for the first time... this may take a moment.")
+        _model = SentenceTransformer('all-MiniLM-L6-v2')
+    return _model
 
 # Define skills and keywords for different role types
 ROLE_SKILLS = {
@@ -95,6 +103,7 @@ def calculate_match_score(jd_text: str, cv_text: str) -> float:
     cv_irrelevant_skills = extract_irrelevant_keywords(cv_text, role_type)
     
     # Base semantic similarity score (works for all role types)
+    model = get_model()
     jd_embedding = model.encode(jd_text, convert_to_tensor=True)
     cv_embedding = model.encode(cv_text, convert_to_tensor=True)
     base_score = float(util.cos_sim(jd_embedding, cv_embedding)[0][0])
